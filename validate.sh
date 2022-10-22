@@ -4,11 +4,13 @@ set -e # safe mode
 
 main() {
 	ghRepos=$(ghcurl "/orgs/$ORG_NAME/repos")
-	IFS=$'\n' repoNames=(
-		$(jq -r '.[].name | select(. != "autograder")' <<< "$ghRepos")
-	)
+	IFS=$'\n' repoNames=( $(jq -r '.[].name' <<< "$ghRepos") )
 
 	for repo in "${repoNames[@]}"; do
+		if repoIsExcluded "$repo"; then
+			continue
+		fi
+
 		# Get all the commits that changes the .github folder.
 		ghCommits=$(ghcurl "/repos/$ORG_NAME/${repo}/commits?path=.github")
 		# Get the latest commit in the .github folder.
@@ -19,8 +21,10 @@ main() {
 		lastCommitterName=$(jq -r '.commit.committer.name' <<< "$lastCommit")
 		lastCommitIsVerified=$(jq -r '.commit.verification.verified' <<< "$lastCommit")
 
-		if [[ "$lastCommitterName" == "GitHub" && "$lastCommitIsVerified" == "true" ]]; then
-			continue
+		if [[ "$lastCommit" != null ]]; then
+			if isTrusted "$lastCommitterName" && [[ "$lastCommitIsVerified" == "true" ]]; then
+				continue
+			fi
 		fi
 
 		extraMessage=""
@@ -37,8 +41,19 @@ main() {
 }
 
 isTrusted() {
+	local user
 	for user in "${TRUSTED_USERS[@]}"; do
 		if [[ "$user" == "$1" ]]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+repoIsExcluded() {
+	local repo
+	for repo in "${EXCLUDED_REPOS[@]}"; do
+		if [[ "$repo" == "$1" ]]; then
 			return 0
 		fi
 	done

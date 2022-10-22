@@ -5,11 +5,6 @@ ORG_NAME="diamondburned-testorg"
 set -e # safe mode
 
 main() {
-	if [[ ! $GUARD_GITHUB_TOKEN ]]; then
-		echo '$GUARD_GITHUB_TOKEN is not set'
-		exit 1
-	fi
-
 	ghRepos=$(ghcurl "/orgs/$ORG_NAME/repos")
 	IFS=$'\n' repoNames=(
 		$(jq -r '.[].name | select(. != "autograder")' <<< "$ghRepos")
@@ -52,12 +47,5 @@ isTrusted() {
 	return 1
 }
 
-ghcurl() {
-	curl \
-		-H "Authorization: Bearer $GUARD_GITHUB_TOKEN" \
-		-H "Accept: application/vnd.github.v3+json" \
-		-s \
-		"${@:1}" "https://api.github.com$1"
-}
-
+alias ghcurl="./ghcurl.sh"
 main "$@"

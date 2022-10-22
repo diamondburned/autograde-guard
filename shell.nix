@@ -1,12 +1,6 @@
 { pkgs ? import <nixpkgs> {} }:
 
-let ghcurl = pkgs.writeShellScriptBin "ghcurl" ''
-	curl \
-		-H "Authorization: Bearer $GUARD_GITHUB_TOKEN" \
-		-H "Accept: application/vnd.github.v3+json" \
-		-s \
-		"''${@:1}" "https://api.github.com$1"
-'';
+let ghcurl = pkgs.writeShellScriptBin "ghcurl" (builtins.readFile ./ghcurl.sh);
 
 in pkgs.mkShell {
 	buildInputs = with pkgs; [

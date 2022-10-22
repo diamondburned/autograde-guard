@@ -1,13 +1,10 @@
 { pkgs ? import <nixpkgs> {} }:
 
-let ghcurl = pkgs.writeShellScriptBin "ghcurl" (builtins.readFile ./ghcurl.sh);
+let deps = import ./.nix/deps.nix { inherit pkgs; };
+	ghcurl = pkgs.writeShellScriptBin "ghcurl" (builtins.readFile ./ghcurl.sh);
 
 in pkgs.mkShell {
-	buildInputs = with pkgs; [
-		bash
-		curl
-		coreutils
-		jq
+	buildInputs = deps ++ [
 		ghcurl
 	];
 }

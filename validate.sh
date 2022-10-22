@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-TRUSTED_USERS=( diamondburned )
-ORG_NAME="diamondburned-testorg"
-
 set -e # safe mode
+. config.sh
 
 main() {
 	ghRepos=$(ghcurl "/orgs/$ORG_NAME/repos")

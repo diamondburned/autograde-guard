@@ -5,6 +5,7 @@ on:
   # https://github.com/orgs/community/discussions/26323.
   schedule:
     - cron: "30 * * * *"
+  workflow_dispatch:
 jobs:
   validate:
     runs-on: ubuntu-latest

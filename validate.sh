@@ -47,5 +47,6 @@ isTrusted() {
 	return 1
 }
 
-alias ghcurl="./ghcurl.sh"
+ghcurl() { ./ghcurl.sh "$@"; }
+
 main "$@"

@@ -14,7 +14,7 @@ jobs:
       - name: Install Nix packages
         uses: rikhuijzer/cache-install@v1
         with:
-          key: nix-${{ hashFiles(".nix/**") }}
+          key: nix-${{ hashFiles('.nix/**') }}
           nix_file: '.nix/action-deps.nix'
       - name: Run validate script
         run: ./validate.sh

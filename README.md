@@ -5,10 +5,11 @@ folders within all the repositories of an organization.
 
 ## Usage
 
-1. Fork [diamondburned-testorg/autograde-guard](https://github.com/diamondburned-testorg/autograde-guard).
-2. Generate a Personal Access Token (PAT).
-	1. Click your profile picture on the top-right and go to *Settings*.
-	2. On the sidebar, go to *Developer settings*, then *Personal access
+1. Fork [diamondburned/autograde-guard](https://github.com/diamondburned/autograde-guard).
+2. Generate a [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+   **Treat this token like it is your password.**
+	1. Click your profile picture on the top-right and go to [*Settings*](https://github.com/settings).
+	2. On the sidebar, go to [*Developer settings*](https://github.com/settings), then *Personal access
 	   tokens*, then *Fine-grained tokens*.
 	3. Click *Generate a new token* on the right-hand side.
 	4. Fill out the token settings:

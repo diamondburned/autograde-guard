@@ -3,7 +3,7 @@
 autograde-guard helps professors and instructors guarantee validity of `.github`
 folders within all the repositories of an organization.
 
-## Usage
+## Setting Up
 
 1. Fork [diamondburned/autograde-guard](https://github.com/diamondburned/autograde-guard).
 2. Generate a [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
@@ -52,6 +52,16 @@ folders within all the repositories of an organization.
 	6. Click the `validate` job.
 	7. Expand the *Run validate script* section. This prints a list of all
 	   tampered repositories.
+
+## Usage
+
+### validate.sh
+
+TBD
+
+### validate.tmpl.sh
+
+TBD
 
 ## Future Work
 

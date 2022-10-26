@@ -20,7 +20,7 @@ folders within all the repositories of an organization.
 		4. Under *Permissions*, choose *Repository permissions* and set the
 		   following:
 		    - *Actions*: read-only
-		   	- *Contents*: read-only
+		   	- *Contents*: read and write
 	5. Click *Generate token*.
 	6. Your PAT will be given to you for copying. It is recommended to put this
 	   into a text file temporarily, since it'll never show you the token again. 

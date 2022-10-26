@@ -35,11 +35,12 @@ folders within all the repositories of an organization.
 	7. Click *Add secret*.
 4. Configure the fork.
 	1. Go to the fork's code.
-	2. Go to the `config.sh` file.
-	3. Change `TRUSTED_USERS` to `( GitHub )` for GitHub Classroom.
-	4. Change `ORG_NAME` to the name of the organization that this was forked
-	   to.
-	5. Optionally change `EXCLUDED_REPOS`.
+	2. Go to the `config.toml` file.
+	3. Change `trustedUsers` under `[validate]` to `[ "GitHub" ]` for GitHub
+	   Classroom.
+	4. Change `orgnizationName` to the name of the organization that this was
+	   forked to.
+	5. Optionally change `excludedRepos`.
 5. Test-run the validation workflow.
 	1. Go to the fork.
 	2. Go to its *Actions* tab.

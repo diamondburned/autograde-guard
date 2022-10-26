@@ -1,0 +1,8 @@
+organizationName = "diamondburned-testorg"
+
+[validate]
+trustedUsers = [ "diamondburned", "GitHub" ]
+excludedRepos = [ "autograder", "autograde-guard" ]
+
+[validate_html]
+showNonTampered = false

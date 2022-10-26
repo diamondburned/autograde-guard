@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+{{ defineDatasource "tampered" "output/validate/tampered.json" }}
+{{ defineDatasource "config" "config.toml" }}
+
+{{ $tampered := datasource "tampered"  }}
+{{ $config := datasource "config" }}
+
+{{ $tamperedFileStat := file.Stat "output/validate/tampered.json" }}
+{{ $tamperedLastMod := $tamperedFileStat.ModTime }}
+
+<title>Validation output — autograde-guard</title>
+<link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.classless.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+<style>
+:root {
+	--tampered: var(--del-color);
+	--not-tampered: #34c628;
+}
+
+code {
+	background: none;
+	padding: 0;
+}
+
+main > h4 {
+	font-weight: lighter;
+}
+
+.repositories {
+	margin: 0;
+	padding: 0;
+}
+
+.repositories > li {
+	list-style: none;
+}
+
+.repository:not(.tampered) {
+	opacity: 0.5;
+}
+
+.repository .material-icons {
+	font-weight: bold;
+}
+
+.repository .keyword,
+.repository .material-icons {
+	color: var(--not-tampered);
+}
+
+.repository.tampered .keyword,
+.repository.tampered .material-icons {
+	color: var(--tampered);
+}
+
+.repository .material-icons {
+	vertical-align: bottom;
+}
+</style>
+
+<main>
+	<h1>autograde-guard</h1>
+	<h4>
+		<b>Results</b>
+		at <time datetime='{{ $tamperedLastMod.Format "2006-01-02T15:04" }}'>
+			{{ $tamperedLastMod.Format "03:04 PM, 01/02/2006 (MST)" }}
+		</time>
+	</h4>
+	<section>
+		<ul class="repositories">
+			{{ range $tampered }}
+				{{ if and (not $config.validate_html.showNonTampered) (not .tampered) }}
+					{{ continue }}
+				{{ end }}
+				<li class="repository {{ if .tampered }}tampered{{ end }}" id="{{ .repo }}">
+					<p>
+						{{ if .tampered }}
+						<span class="material-icons">close</span>
+						{{ else }}
+						<span class="material-icons">done</span>
+						{{ end }}
+						<span class="repository-name">
+							<a href="{{ .url }}">{{ .repo }}</a>
+						</span>
+						{{ if .tampered }}
+						is <span class="keyword">tampered</span>
+							{{ if .last_sha }}
+							at commit <a href="{{ .url }}/commit/{{ .last_sha }}">{{ .last_sha }}</a>
+							by <a href="https://github.com/{{ .last_author_name }}">{{ .last_author_name }}</a>.
+							{{ else }}
+							(<code>.github</code> is potentially wiped).
+							{{ end }}
+						{{ else }}
+						is <span class="keyword">not tampered</span> with.
+						{{ end }}
+				</li>
+			{{ end }}
+		</ul>
+	</section>
+</main>

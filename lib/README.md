@@ -31,10 +31,10 @@ libraryname() {}
 # libraryname::functionName is ABC...
 libraryname::functionName() {}
 
-# libraryname::functionName2($1: var1, $2: var2, ...)
+# libraryname::__functionName2($1: var1, $2: var2, ...)
 #
-# libraryname::functionName2 is ABC...
-libraryname::functionName2() {}
+# libraryname::__functionName2 is ABC...
+libraryname::__functionName2() {}
 ```
 
 ### Variables

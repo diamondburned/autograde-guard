@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
+
+. lib/bool.sh
+
 ghcurl() {
 	if [[ ! $GUARD_GITHUB_TOKEN ]]; then
 		echo '$GUARD_GITHUB_TOKEN is not set'
-		exit 1
+		exit $FALSE
 	fi
 	
 	curl \

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-. lib/util.sh
+. lib/bool.sh
 . lib/config.sh
 . lib/ghcurl.sh
 

@@ -95,6 +95,7 @@
 	</h4>
 	<section>
 		<ul class="repositories">
+			{{ $tampered = coll.Sort ".repo" $tampered }}
 			{{ range $tampered }}
 				{{ if or $config.validate_html.showNonTampered .tampered }}
 					<li class="repository {{ if .tampered }}tampered{{ end }}" id="{{ .repo }}">

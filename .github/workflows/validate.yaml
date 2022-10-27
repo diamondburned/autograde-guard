@@ -1,33 +1,36 @@
 name: Validate .github
 on:
-  # TODO: consider if we can trigger this from students' repos everytime they
-  # push using a PAT with no access. Then we can run this every 24h. See
-  # https://github.com/orgs/community/discussions/26323.
-  schedule:
-    - cron: "30 * * * *"
-  workflow_dispatch:
+    # TODO: consider if we can trigger this from students' repos everytime they
+    # push using a PAT with no access. Then we can run this every 24h. See
+    # https://github.com/orgs/community/discussions/26323.
+    schedule:
+        - cron: "30 * * * *"
+    # Allow manual triggering.
+    workflow_dispatch:
+    # Allow automatic triggering through webhook dispatch.
+    repository_dispatch:
 jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+    validate:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
 
-      - name: Install Nix packages
-        uses: rikhuijzer/cache-install@v1.0.9
-        with:
-          key: nix-${{ hashFiles('.nix/**') }}
-          nix_file: '.nix/action-deps.nix'
+            - name: Install Nix packages
+              uses: rikhuijzer/cache-install@v1.0.9
+              with:
+                  key: nix-${{ hashFiles('.nix/**') }}
+                  nix_file: ".nix/action-deps.nix"
 
-      - name: Run validate script
-        run: ./validate.sh
-        env:
-          GUARD_GITHUB_TOKEN: ${{ secrets.GUARD_GITHUB_TOKEN }}
+            - name: Run validate script
+              run: ./validate.sh
+              env:
+                  GUARD_GITHUB_TOKEN: ${{ secrets.GUARD_GITHUB_TOKEN }}
 
-      - name: Render validation HTML page
-        run: ./validate.tmpl.sh
+            - name: Render validation HTML page
+              run: ./validate.tmpl.sh
 
-      - name: Upload validate outputs
-        uses: actions/upload-artifact@v2
-        with:
-          name: validate-outputs
-          path: output/validate/
+            - name: Upload outputs
+              uses: actions/upload-artifact@v2
+              with:
+                  name: outputs
+                  path: output

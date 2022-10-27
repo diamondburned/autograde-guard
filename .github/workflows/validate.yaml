@@ -11,12 +11,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Install Nix packages
         uses: rikhuijzer/cache-install@v1.0.9
         with:
           key: nix-${{ hashFiles('.nix/**') }}
           nix_file: '.nix/action-deps.nix'
+
       - name: Run validate script
         run: ./validate.sh
         env:
           GUARD_GITHUB_TOKEN: ${{ secrets.GUARD_GITHUB_TOKEN }}
+
+      - name: Render validation HTML page
+        run: ./validate.tmpl.sh
+
+      - name: Upload validate outputs
+        uses: actions/upload-artifact@v2
+        with:
+          name: validate-outputs
+          path: output/validate/

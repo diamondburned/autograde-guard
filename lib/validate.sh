@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+. lib/json.sh
 . lib/bool.sh
 . lib/config.sh
 . lib/ghcurl.sh
@@ -23,14 +24,25 @@ validate::repoIsTampered() {
 
 	# Get all the commits that changes the .github folder.
 	local ghCommits=$(ghcurl "/repos/${orgName}/${repo}/commits?path=.github")
+
 	# Get the latest commit in the .github folder.
-	validate_last_commit=$(jq -r '.[0]' <<< "$ghCommits")
+	validate_last_commit_json=$(jq '.[0]' <<< "$ghCommits")
+	if [[ "$validate_last_commit_json" == "null" ]]; then
+		validate_last_commit=
+	else
+		validate_last_commit=$(jq -r '.' <<< "$validate_last_commit_json")
+	fi
+	local j=$validate_last_commit
+
 	# Get the commit hash, committer name and whether they're verified.
-	validate_last_commit_hash=$(jq -r '.sha' <<< "$validate_last_commit")
+	validate_last_commit_hash=$(json::get "$j" .sha)
 	validate_last_commit_hash=${validate_last_commit_hash:0:7}
-	validate_last_committer_name=$(jq -r '.commit.committer.name' <<< "$validate_last_commit")
-	validate_last_committer_email=$(jq -r '.commit.committer.email' <<< "$validate_last_commit")
-	validate_last_commit_is_verified=$(jq -r '.commit.verification.verified' <<< "$validate_last_commit")
+	validate_last_author_id=$(json::get "$j" .author.id)
+	validate_last_author_name=$(json::get "$j" .author.login)
+	validate_last_author_avatar_url=$(json::get "$j" .author.avatar_url)
+	validate_last_committer_name=$(json::get "$j" .commit.committer.name)
+	validate_last_committer_email=$(json::get "$j" .commit.committer.email)
+	validate_last_commit_is_verified=$(json::get "$j" .commit.verification.verified)
 
 	if [[ "$validate_last_commit" != null ]]; then
 		if validate::userIsTrusted "$validate_last_committer_name" && [[ "$validate_last_commit_is_verified" == "true" ]]; then

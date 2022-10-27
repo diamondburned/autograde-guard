@@ -12,6 +12,7 @@
 <title>Validation output — autograde-guard</title>
 <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.classless.min.css" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <style>
 	:root {
@@ -37,6 +38,12 @@
 		list-style: none;
 	}
 
+	.repository {
+		display: flex;
+		flex-direction: row;
+		gap: 0.25em;
+	}
+
 	.repository:not(.tampered) {
 		opacity: 0.5;
 	}
@@ -58,6 +65,23 @@
 	.repository .material-icons {
 		vertical-align: bottom;
 	}
+
+	.repository p * {
+		display: inline-block;
+	}
+
+	.repository .tampered-info {
+		margin-top: 0.5em;
+		font-size: 0.9em;
+	}
+
+	.github-user img {
+		width: 1.3em;
+		height: 1.3em;
+		border-radius: 999px;
+		background-color: var(--accordion-border-color);
+		vertical-align: sub;
+	}
 </style>
 
 <main>
@@ -74,29 +98,44 @@
 			{{ range $tampered }}
 				{{ if or $config.validate_html.showNonTampered .tampered }}
 					<li class="repository {{ if .tampered }}tampered{{ end }}" id="{{ .repo }}">
-						<p>
+						<p class="tampered-icon">
 							{{ if .tampered }}
 								<span class="material-icons">close</span>
 							{{ else }}
 								<span class="material-icons">done</span>
 							{{ end }}
+						</p>
+						<p>
 							<span class="repository-name">
 								<a href="{{ .url }}">{{ .repo }}</a>
 							</span>
 							{{ if .tampered }}
 								is <span class="keyword">tampered</span>
-								{{ if .last_sha }}
-									at commit
-									<a href="{{ .url }}/commit/{{ .last_sha }}">{{ .last_sha }}</a>
-									by
-									<a href="https://github.com/{{ .last_author_name }}"
-										>{{ .last_author_name }}</a
-									>.
-								{{ else }}
-									(<code>.github</code> is potentially wiped).
-								{{ end }}
 							{{ else }}
 								is <span class="keyword">not tampered</span> with.
+							{{ end }}
+							{{ if .tampered }}
+								<br />
+								<span class="tampered-info">
+									{{ if .last_commit }}
+										Commit
+										<a href="{{ .url }}/commit/{{ .last_commit }}">
+											{{ .last_commit }}
+										</a>
+										by
+										<span class="github-user">
+											<img src="{{ .last_author_avatar_url }}&size=128" />
+											<a href="https://github.com/{{ .last_author_name }}">
+												{{ .last_author_name }}
+											</a>
+											{{ if not .last_commit_is_verified }}
+												<span class="keyword">(unverified)</span>
+											{{ end }}
+										</span>
+									{{ else }}
+										<code>.github</code> not found in history
+									{{ end }}
+								</span>
 							{{ end }}
 						</p>
 					</li>

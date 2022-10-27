@@ -72,7 +72,7 @@
 	<section>
 		<ul class="repositories">
 			{{ range $tampered }}
-				{{ if or ($config.validate_html.showNonTampered) (not .tampered) }}
+				{{ if or $config.validate_html.showNonTampered .tampered }}
 					<li class="repository {{ if .tampered }}tampered{{ end }}" id="{{ .repo }}">
 						<p>
 							{{ if .tampered }}

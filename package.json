@@ -1,0 +1,15 @@
+{
+  "name": "autograde-guard",
+  "version": "0.0.1",
+  "description": "autograde-guard helps professors and instructors guarantee validity of `.github` folders within all the repositories of an organization.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diamondburned/autograde-guard.git"
+  },
+  "author": "diamondburned",
+  "license": "MIT",
+  "dependencies": {
+    "prettier": "^2.7.1",
+    "prettier-plugin-go-template": "^0.0.13"
+  }
+}

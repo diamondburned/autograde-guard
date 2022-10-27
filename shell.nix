@@ -1,6 +1,9 @@
 { pkgs ? import <nixpkgs> {} }:
 
-let deps = import ./.nix/deps.nix { inherit pkgs; };
+let deps = import ./.nix/deps.nix {
+		inherit pkgs;
+	};
+
 	ghcurl = pkgs.writeShellScriptBin "ghcurl" ''
 		cd ${./.}
 		. lib/ghcurl.sh
@@ -9,7 +12,12 @@ let deps = import ./.nix/deps.nix { inherit pkgs; };
 	'';
 
 in pkgs.mkShell {
-	buildInputs = deps ++ [
+	buildInputs = deps ++ (with pkgs; [
 		ghcurl
-	];
+		nodejs
+	]);
+
+	shellHook = ''
+		PATH="$PATH:$PWD/node_modules/.bin"
+	'';
 }

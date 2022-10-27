@@ -1,0 +1,18 @@
+{
+  "tabWidth": 4,
+  "printWidth": 100,
+  "useTabs": true,
+  "semi": false,
+  "singleQuote": false,
+  "singleAttributePerLine": false,
+  "bracketSameLine": false,
+  "trailingComma": "all",
+  "overrides": [
+    {
+      "files": "*.html",
+      "options": {
+        "parser": "go-template"
+      }
+    }
+  ]
+}

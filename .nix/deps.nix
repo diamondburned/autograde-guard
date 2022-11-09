@@ -5,6 +5,7 @@ with pkgs; [
 	curl
 	coreutils
 	jq
+	parallel
 	gomplate
 	taplo-cli
 ]

@@ -1,18 +1,30 @@
 #!/usr/bin/env bash
 set -e # safe mode
 
+. lib/log.sh
 . lib/config.sh
 . lib/ghcurl.sh
 . lib/validate.sh
+. lib/parallel.sh
 
 main() {
+	if (( $# == 0 )); then
+		validateAll
+		return
+	fi
+
+	for repo in "$@"; do
+		validateRepo "$repo"
+	done
+}
+
+validateAll() {
 	orgName=$(config::get ".organizationName")
 	repoPage=1
-	jsonOutputs=()
+	jsonOutputs=""
 
 	# Cache outputs.
 	mkdir -p output/validate/
-	:> output/validate/tampered.txt
 	:> output/validate/tampered.json
 
 	while :; do
@@ -22,9 +34,17 @@ main() {
 		ghRepos=$(ghcurl "$path")
 
 		IFS=$'\n' repoNames=( $(jq -r '.[].name' <<< "$ghRepos") )
+		filteredNames=()
 		for repo in "${repoNames[@]}"; do
-			validateRepo "$repo"
+			if validate::includeRepo "$repo"; then
+				filteredNames+=( "$repo" )
+			else
+				log "$repo is skipped."
+			fi
 		done
+
+		output=$(printf "%s\n" "${filteredNames[@]}" | parallel -j4 ./validate.sh)
+		jsonOutputs+="$output"$'\n'
 
 		if (( ${#repoNames[@]} < 100 )); then
 			break
@@ -34,21 +54,13 @@ main() {
 	done
 
 	# Join all our objects into a single JSON array.
-	printf "%s\n" "${jsonOutputs[@]}" | jq -s . > output/validate/tampered.json
+	jq -s . > output/validate/tampered.json <<< "$jsonOutputs"
 }
 
 validateRepo() {
 	local repo="$1"
-
-	if ! validate::includeRepo "$repo"; then
-		echo "$repo is skipped."
-		return
-	fi
-
-	local j
 	if validate::repoIsTampered "$repo"; then
 		local extraMessage=""
-
 		if [[ "${validate_last_commit}" ]]; then
 			printf -v extraMessage \
 				"commit %s by %s" \
@@ -58,10 +70,9 @@ validateRepo() {
 			extraMessage="no .github folder"
 		fi
 
-		echo "$repo is tampered ($extraMessage)."
-		echo "$repo" >> output/validate/tampered.txt
+		log "$repo is tampered ($extraMessage)."
 
-		j=$(json::obj \
+		json::obj \
 			repo "$repo" \
 			org "$orgName" \
 			url "https://github.com/$orgName/$repo" \
@@ -72,15 +83,14 @@ validateRepo() {
 			last_commit_is_verified "$validate_last_commit_is_verified" \
 			last_author_id,omitempty "$validate_last_author_id" \
 			last_author_name,omitempty "$validate_last_author_name" \
-			last_author_avatar_url,omitempty "$validate_last_author_avatar_url")
+			last_author_avatar_url,omitempty "$validate_last_author_avatar_url"
 	else
-		j=$(json::obj \
+		json::obj \
 			repo "$repo" \
 			org "$orgName" \
 			url "https://github.com/$orgName/$repo" \
-			tampered false)
+			tampered false
 	fi
-	jsonOutputs+=( "$j" )
 }
 
 main "$@"

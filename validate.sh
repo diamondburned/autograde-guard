@@ -39,7 +39,7 @@ validateAll() {
 			if validate::includeRepo "$repo"; then
 				filteredNames+=( "$repo" )
 			else
-				log "$repo is skipped."
+				log::trace "$repo is skipped."
 			fi
 		done
 
@@ -85,6 +85,8 @@ validateRepo() {
 			last_author_name,omitempty "$validate_last_author_name" \
 			last_author_avatar_url,omitempty "$validate_last_author_avatar_url"
 	else
+		log::trace "$repo is not tampered."
+
 		json::obj \
 			repo "$repo" \
 			org "$orgName" \

@@ -11,3 +11,7 @@ log::f() {
 	printf -v str "$@"
 	log "$str"
 }
+
+log::trace() {
+	[[ $GUARD_TRACE == 1 ]] && log "$1"
+}

@@ -5,6 +5,11 @@
 . lib/config.sh
 . lib/ghcurl.sh
 
+__validate_orgName=$(config::get ".organizationName")
+config::array_into __trusted_users ".validate.trustedUsers"
+config::array_into __validate_included_repos ".validate.includedRepos"
+config::array_into __validate_excluded_repos ".validate.excludedRepos"
+
 # validate::repoIsTampered($1: repo) -> bool
 #
 # repoIsTampered returns true (0) if the given repository within the defined
@@ -16,11 +21,11 @@ validate::repoIsTampered() {
 	export validate_last_commit_is_verified=""
 
 	local repo="$1"
+	local orgName="$__validate_orgName"
+
 	if ! validate::includeRepo "$repo"; then
 		return $FALSE
 	fi
-
-	local orgName=$(config::get ".organizationName")
 
 	# Get all the commits that changes the .github folder.
 	local ghCommits=$(ghcurl "/repos/${orgName}/${repo}/commits?path=.github")
@@ -55,7 +60,6 @@ validate::repoIsTampered() {
 
 # validate::userIsTrusted($1: user) -> bool
 validate::userIsTrusted() {
-	config::array_into __trusted_users ".validate.trustedUsers"
 	local user
 	for user in "${__trusted_users[@]}"; do
 		if [[ "$1" == $user ]]; then
@@ -64,9 +68,6 @@ validate::userIsTrusted() {
 	done
 	return $FALSE
 }
-
-config::array_into __validate_included_repos ".validate.includedRepos"
-config::array_into __validate_excluded_repos ".validate.excludedRepos"
 
 # validate::includeRepo($1: repo) -> bool
 validate::includeRepo() {

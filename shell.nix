@@ -22,4 +22,5 @@ in pkgs.mkShell {
 	'';
 
 	NO_COLOR = "1";
+	GUARD_TRACE = "1";
 }

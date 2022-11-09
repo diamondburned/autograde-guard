@@ -7,6 +7,7 @@ set -e # safe mode
 
 main() {
 	orgName=$(config::get ".organizationName")
+	repoPage=1
 	jsonOutputs=()
 
 	# Cache outputs.
@@ -16,9 +17,8 @@ main() {
 
 	while :; do
 		local path
-		local page=0
+		printf -v path "/orgs/%s/repos?per_page=100&page=%d" "$orgName" "$repoPage"
 
-		printf -v path "/orgs/%s/repos?per_page=100&page=%d" "$orgName" "$page"
 		ghRepos=$(ghcurl "$path")
 
 		IFS=$'\n' repoNames=( $(jq -r '.[].name' <<< "$ghRepos") )
@@ -28,6 +28,8 @@ main() {
 
 		if (( ${#repoNames[@]} < 100 )); then
 			break
+		else
+			repoPage=$[ repoPage + 1 ]
 		fi
 	done
 

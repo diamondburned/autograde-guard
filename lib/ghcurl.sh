@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
 
 . lib/bool.sh
+. lib/log.sh
+
+command -v gh &> /dev/null || {
+	log "Missing gh. Did you run nix-shell?"
+	exit 1
+}
 
 ghcurl() {
-	if [[ ! $GUARD_GITHUB_TOKEN ]]; then
-		echo '$GUARD_GITHUB_TOKEN is not set'
-		exit $FALSE
-	fi
-	
-	curl \
-		-H "Authorization: Bearer $GUARD_GITHUB_TOKEN" \
-		-H "Accept: application/vnd.github.v3+json" \
-		-s \
-		"${@:1}" "https://api.github.com$1"
+	GITHUB_TOKEN="$GUARD_GITHUB_TOKEN" gh api "$@"
 }

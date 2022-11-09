@@ -30,6 +30,7 @@ jobs:
               run: ./validate.tmpl.sh
 
             - name: Upload outputs
+              if: always()
               uses: actions/upload-artifact@v2
               with:
                   name: outputs

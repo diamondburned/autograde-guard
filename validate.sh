@@ -43,7 +43,7 @@ validateAll() {
 			fi
 		done
 
-		output=$(parallel -j4 ./validate.sh -- "${filteredNames[@]}")
+		output=$(parallel -j10 ./validate.sh -- "${filteredNames[@]}")
 		jsonOutputs+="$output"$'\n'
 
 		if (( ${#repoNames[@]} < 100 )); then

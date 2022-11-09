@@ -2,7 +2,8 @@ organizationName = "diamondburned-testorg"
 
 [validate]
 trustedUsers = [ "diamondburned", "GitHub" ]
-excludedRepos = [ "autograder", "autograde-guard" ]
+includedRepos = [ "test*" ]
+excludedRepos = [ "autograde*" ]
 
 [validate_html]
 showNonTampered = false

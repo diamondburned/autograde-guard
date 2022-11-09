@@ -16,7 +16,7 @@ validate::repoIsTampered() {
 	export validate_last_commit_is_verified=""
 
 	local repo="$1"
-	if validate::repoIsExcluded "$repo"; then
+	if ! validate::includeRepo "$repo"; then
 		return $FALSE
 	fi
 
@@ -58,21 +58,51 @@ validate::userIsTrusted() {
 	config::array_into __trusted_users ".validate.trustedUsers"
 	local user
 	for user in "${__trusted_users[@]}"; do
-		if [[ "$user" == "$1" ]]; then
+		if [[ "$1" == $user ]]; then
 			return $TRUE
 		fi
 	done
 	return $FALSE
 }
 
-# validate::repoIsExcluded($1: repo) -> bool
+config::array_into __validate_included_repos ".validate.includedRepos"
+config::array_into __validate_excluded_repos ".validate.excludedRepos"
+
+# validate::includeRepo($1: repo) -> bool
+validate::includeRepo() {
+	if (( ${#__validate_included_repos[@]} > 0 )); then
+		if ! validate::repoIsIncluded "$1"; then
+			return $FALSE
+		fi
+	fi
+
+	if (( ${#__validate_excluded_repos[@]} == 0 )); then
+		if validate::repoIsExcluded "$1"; then
+			return $FALSE
+		fi
+	fi
+
+	return $TRUE
+}
+
 validate::repoIsExcluded() {
-	config::array_into __excluded_repos ".validate.excludedRepos"
 	local repo
-	for repo in "${__excluded_repos[@]}"; do
-		if [[ "$repo" == "$1" ]]; then
+	for repo in "${__validate_excluded_repos[@]}"; do
+		if [[ "$1" == $repo ]]; then
 			return $TRUE
 		fi
 	done
+
+	return $FALSE
+}
+
+validate::repoIsIncluded() {
+	local repo
+	for repo in "${__validate_included_repos[@]}"; do
+		if [[ "$1" == $repo ]]; then
+			return $TRUE
+		fi
+	done
+
 	return $FALSE
 }

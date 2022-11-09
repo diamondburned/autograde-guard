@@ -33,5 +33,5 @@ jobs:
               if: always()
               uses: actions/upload-artifact@v2
               with:
-                  name: outputs
-                  path: output
+                  name: validate
+                  path: output/validate/

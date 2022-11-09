@@ -67,7 +67,7 @@ validate::repoIsTampered() {
 validate::userIsTrusted() {
 	local user
 	for user in "${__trusted_users[@]}"; do
-		if [[ "$1" == $user ]]; then
+		if validate::match "$1" "$user"; then
 			return $TRUE
 		fi
 	done
@@ -94,7 +94,7 @@ validate::includeRepo() {
 validate::repoIsExcluded() {
 	local repo
 	for repo in "${__validate_excluded_repos[@]}"; do
-		if [[ "$1" == $repo ]]; then
+		if validate::match "$1" "$repo"; then
 			return $TRUE
 		fi
 	done
@@ -105,10 +105,23 @@ validate::repoIsExcluded() {
 validate::repoIsIncluded() {
 	local repo
 	for repo in "${__validate_included_repos[@]}"; do
-		if [[ "$1" == $repo ]]; then
+		if validate::match "$1" "$repo"; then
 			return $TRUE
 		fi
 	done
 
 	return $FALSE
+}
+
+# validate::match($1: str, $2: matcher)
+validate::match() {
+	if [[ $2 == "/"*"/" ]]; then
+		local m="${2%*/}" # Trim the trailing slashes.
+		local m="${m#/*}"
+		[[ "$1" =~ $m ]]
+		return
+	else
+		[[ "$1" == "$2" ]]
+		return
+	fi
 }

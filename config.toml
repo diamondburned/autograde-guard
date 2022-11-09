@@ -2,7 +2,7 @@ organizationName = "diamondburned-testorg"
 
 [validate]
 trustedUsers = [ "diamondburned", "GitHub" ]
-includedRepos = [ "test[0-9]*" ]
+includedRepos = [ "/test[0-9]*/" ]
 # excludedRepos = [ "autograde*" ]
 
 [validate_html]

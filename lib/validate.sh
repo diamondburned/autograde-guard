@@ -31,13 +31,10 @@ validate::repoIsTampered() {
 	local ghCommits=$(ghcurl "/repos/${orgName}/${repo}/commits?path=.github")
 
 	# Get the latest commit in the .github folder.
-	validate_last_commit_json=$(jq '.[0]' <<< "$ghCommits")
-	if [[ "$validate_last_commit_json" == "null" ]]; then
-		validate_last_commit=
-	else
-		validate_last_commit=$(jq -r '.' <<< "$validate_last_commit_json")
+	validate_last_commit=$(json::get "$ghCommits" '.[0]')
+
+	if [[ "$validate_last_commit" != "" ]]; then
 		local j=$validate_last_commit
-	
 		# Get the commit hash, committer name and whether they're verified.
 		validate_last_commit_hash=$(json::get "$j" .sha)
 		validate_last_commit_hash=${validate_last_commit_hash:0:7}

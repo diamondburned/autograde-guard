@@ -2,7 +2,8 @@
 
 # json::get(json, key)
 json::get() {
-	jq -r "$2" <<< "$1"
+	# https://github.com/stedolan/jq/issues/354
+	jq -r "$2 // empty" <<< "$1"
 }
 
 # json::obj([key, value]...)

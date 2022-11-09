@@ -5,7 +5,6 @@ set -e # safe mode
 . lib/config.sh
 . lib/ghcurl.sh
 . lib/validate.sh
-. lib/parallel.sh
 
 main() {
 	if (( $# == 0 )); then
@@ -43,7 +42,7 @@ validateAll() {
 			fi
 		done
 
-		output=$(printf "%s\n" "${filteredNames[@]}" | parallel -j4 ./validate.sh)
+		output=$(parallel -j4 ./validate.sh -- "${filteredNames[@]}")
 		jsonOutputs+="$output"$'\n'
 
 		if (( ${#repoNames[@]} < 100 )); then

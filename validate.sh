@@ -6,6 +6,8 @@ set -e # safe mode
 . lib/ghcurl.sh
 . lib/validate.sh
 
+orgName=$(config::get ".organizationName")
+
 main() {
 	if (( $# == 0 )); then
 		validateAll
@@ -18,7 +20,6 @@ main() {
 }
 
 validateAll() {
-	orgName=$(config::get ".organizationName")
 	repoPage=1
 	jsonOutputs=""
 

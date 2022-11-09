@@ -125,13 +125,13 @@
 										</a>
 										by
 										<span class="github-user">
-											{{ if .last_author_avatar_url }}
+											{{ if coll.Has . "last_author_avatar_url" }}
 												<img src="{{ .last_author_avatar_url }}&size=128" />
 											{{ end }}
 											<a href="https://github.com/{{ .last_author_name }}">
 												{{ .last_author_name }}
 											</a>
-											{{ if not .last_commit_is_verified }}
+											{{ if not (and (coll.Has . "last_commit_is_verified") .last_commit_is_verified) }}
 												<span class="keyword">(unverified)</span>
 											{{ end }}
 										</span>

@@ -20,4 +20,6 @@ in pkgs.mkShell {
 	shellHook = ''
 		PATH="$PATH:$PWD/node_modules/.bin"
 	'';
+
+	NO_COLOR = "1";
 }

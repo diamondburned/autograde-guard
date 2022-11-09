@@ -4,6 +4,7 @@ with pkgs; [
 	bash
 	curl
 	coreutils
+	gh
 	jq
 	moreutils # for parallel
 	gomplate

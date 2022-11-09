@@ -76,7 +76,7 @@ validate::includeRepo() {
 		fi
 	fi
 
-	if (( ${#__validate_excluded_repos[@]} == 0 )); then
+	if (( ${#__validate_excluded_repos[@]} > 0 )); then
 		if validate::repoIsExcluded "$1"; then
 			return $FALSE
 		fi

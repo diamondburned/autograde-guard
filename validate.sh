@@ -39,6 +39,7 @@ validateRepo() {
 	local repo="$1"
 
 	if ! validate::includeRepo "$repo"; then
+		echo "$repo is skipped."
 		return
 	fi
 

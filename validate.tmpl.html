@@ -16,8 +16,10 @@
 
 <style>
 	:root {
+		--ok-color: #34c628;
+		--verified: var(--ok-color);
 		--tampered: var(--del-color);
-		--not-tampered: #34c628;
+		--not-tampered: var(--ok-color);
 	}
 
 	code {
@@ -88,6 +90,11 @@
 		background-color: var(--accordion-border-color);
 		vertical-align: sub;
 	}
+
+	.verified-badge {
+		color: var(--verified);
+		font-size: 0.8em;
+	}
 </style>
 
 <main>
@@ -138,9 +145,7 @@
 												>
 													{{ .last_author_name }}
 												</a>
-												{{ if not (and (coll.Has . "last_commit_is_verified") .last_commit_is_verified) }}
-													<span class="keyword">(unverified)</span>
-												{{ end }}
+												{{ template "verified-badge" . }}
 											</span>
 										{{ else }}
 											<span class="git-user">
@@ -149,7 +154,7 @@
 												>
 													{{ .last_committer_name }}
 												</code>
-												<span class="keyword">(unverified)</span>
+												{{ template "verified-badge" . }}
 											</span>
 										{{ end }}
 									{{ else }}
@@ -164,3 +169,9 @@
 		</ul>
 	</section>
 </main>
+
+{{ define "verified-badge" }}
+	{{ if and (coll.Has . "last_commit_is_verified") (.last_commit_is_verified) }}
+		<span class="verified-badge">(verified)</span>
+	{{ end }}
+{{ end }}

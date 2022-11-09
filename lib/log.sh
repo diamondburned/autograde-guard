@@ -13,5 +13,7 @@ log::f() {
 }
 
 log::trace() {
-	[[ $GUARD_TRACE == 1 ]] && log "$1"
+	if [[ $GUARD_TRACE == 1 ]]; then
+		 log "$1"
+	fi
 }

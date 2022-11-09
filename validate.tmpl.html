@@ -125,7 +125,9 @@
 										</a>
 										by
 										<span class="github-user">
-											<img src="{{ .last_author_avatar_url }}&size=128" />
+											{{ if .last_author_avatar_url }}
+												<img src="{{ .last_author_avatar_url }}&size=128" />
+											{{ end }}
 											<a href="https://github.com/{{ .last_author_name }}">
 												{{ .last_author_name }}
 											</a>

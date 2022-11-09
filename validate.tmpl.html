@@ -29,6 +29,12 @@
 		font-weight: lighter;
 	}
 
+	[title] {
+		text-decoration: underline;
+		text-decoration-style: dotted;
+		cursor: help;
+	}
+
 	.repositories {
 		margin: 0;
 		padding: 0;
@@ -124,17 +130,28 @@
 											{{ .last_commit }}
 										</a>
 										by
-										<span class="github-user">
-											{{ if coll.Has . "last_author_avatar_url" }}
+										{{ if coll.Has . "last_author_id" }}
+											<span class="github-user">
 												<img src="{{ .last_author_avatar_url }}&size=128" />
-											{{ end }}
-											<a href="https://github.com/{{ .last_author_name }}">
-												{{ .last_author_name }}
-											</a>
-											{{ if not (and (coll.Has . "last_commit_is_verified") .last_commit_is_verified) }}
+												<a
+													href="https://github.com/{{ .last_author_name }}"
+												>
+													{{ .last_author_name }}
+												</a>
+												{{ if not (and (coll.Has . "last_commit_is_verified") .last_commit_is_verified) }}
+													<span class="keyword">(unverified)</span>
+												{{ end }}
+											</span>
+										{{ else }}
+											<span class="git-user">
+												<code
+													title="{{ .last_committer_name }} &lt;{{ .last_committer_email }}&gt;"
+												>
+													{{ .last_committer_name }}
+												</code>
 												<span class="keyword">(unverified)</span>
-											{{ end }}
-										</span>
+											</span>
+										{{ end }}
 									{{ else }}
 										<code>.github</code> not found in history
 									{{ end }}

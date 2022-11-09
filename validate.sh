@@ -80,7 +80,7 @@ validateRepo() {
 			last_commit "$validate_last_commit_hash" \
 			last_committer_name,omitempty "$validate_last_committer_name" \
 			last_committer_email,omitempty "$validate_last_committer_email" \
-			last_commit_is_verified "$validate_last_commit_is_verified" \
+			last_commit_is_verified,omitempty "$validate_last_commit_is_verified" \
 			last_author_id,omitempty "$validate_last_author_id" \
 			last_author_name,omitempty "$validate_last_author_name" \
 			last_author_avatar_url,omitempty "$validate_last_author_avatar_url"

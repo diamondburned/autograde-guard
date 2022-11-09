@@ -27,7 +27,7 @@ json::obj() {
 		if [[ $k == *",omitempty" ]]; then
 			# Trim the ,omitempty away.
 			k=${k%*,omitempty}
-			[[ $v == "" || $v == "null" || "$v" == "false" ]] && continue
+			[[ $v == "" ]] && continue
 		else
 			# Just consider empty strings as null. Whatever.
 			if [[ $v == "" ]]; then

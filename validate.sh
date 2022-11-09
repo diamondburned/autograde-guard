@@ -26,7 +26,7 @@ main() {
 			validateRepo "$repo"
 		done
 
-		if (( ${#repoNames_[@]} < 100 )); then
+		if (( ${#repoNames[@]} < 100 )); then
 			break
 		fi
 	done

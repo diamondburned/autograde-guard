@@ -171,7 +171,9 @@
 </main>
 
 {{ define "verified-badge" }}
-	{{ if and (coll.Has . "last_commit_is_verified") (.last_commit_is_verified) }}
-		<span class="verified-badge">(verified)</span>
+	{{ if (has . "last_commit_is_verified") }}
+		{{ if (eq (index . "last_commit_is_verified") true) }}
+			<span class="verified-badge">(verified)</span>
+		{{ end }}
 	{{ end }}
 {{ end }}

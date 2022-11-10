@@ -21,7 +21,8 @@ jobs:
                   key: nix-${{ hashFiles('.nix/**') }}
                   nix_file: ".nix/action-deps.nix"
 
-            - name: Restore last output
+            - name: Restore last outputs
+              if: always()
               uses: actions/cache@v3
               with:
                   path: output/
@@ -36,7 +37,7 @@ jobs:
             - name: Render validation HTML page
               run: ./validate.tmpl.sh
 
-            - name: Upload outputs
+            - name: Upload new outputs
               if: always()
               uses: actions/upload-artifact@v2
               with:

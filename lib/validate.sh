@@ -23,10 +23,6 @@ validate::repoIsTampered() {
 	local repo="$1"
 	local orgName="$__validate_orgName"
 
-	if ! validate::includeRepo "$repo"; then
-		return $FALSE
-	fi
-
 	# Get all the commits that changes the .github folder.
 	local ghCommits=$(ghcurl "/repos/${orgName}/${repo}/commits?path=.github")
 

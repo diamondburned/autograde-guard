@@ -25,36 +25,62 @@ validateAll() {
 
 	# Cache outputs.
 	mkdir -p output/validate/
-	:> output/validate/tampered.json
+
+	# Try and read our pushed at times.
+	lastFetched=""
+	oldTampered=""
+	if [[ -f output/validate/last_fetched.json && -f output/validate/tampered.json ]]; then
+		lastFetched=$(< output/validate/last_fetched.json)
+		oldTampered=$(< output/validate/tampered.json)
+	fi
 
 	while :; do
-		local path
 		printf -v path "/orgs/%s/repos?per_page=100&page=%d" "$orgName" "$repoPage"
-
 		ghRepos=$(ghcurl "$path")
 
-		IFS=$'\n' repoNames=( $(jq -r '.[].name' <<< "$ghRepos") )
 		filteredNames=()
-		for repo in "${repoNames[@]}"; do
-			if validate::includeRepo "$repo"; then
-				filteredNames+=( "$repo" )
-			else
-				log::trace "$repo is skipped."
-			fi
-		done
+		numRepos=0
 
-		output=$(parallel -j10 ./validate.sh -- "${filteredNames[@]}")
+		while read -d $'\n' -r repo; do
+			name=$(json::get "$repo" ".name")
+			pushedAt=$(json::get "$repo" ".pushed_at")
+			numRepos=$[numRepos + 1]
+
+			if ! validate::includeRepo "$name"; then
+				log::trace "$name is skipped."
+				continue
+			fi
+
+			lastPushedAt=$(json::get "$lastFetched" '.[$name]' \
+				--arg name "$name")
+			lastResult=$(json::get "$oldTampered" '.[] | select(.repo == $name)' \
+				--arg name "$name")
+
+			if [[ "$lastResult" != "" && "$lastPushedAt" == "$pushedAt" ]]; then
+				log::trace "$name is unchanged, using its cache"
+				jsonOutputs+="$lastResult"
+			else
+				filteredNames+=( "$name" )
+				lastFetched=$(jq \
+					--arg name "$name" \
+					--arg pushedAt "$pushedAt" \
+					'.[$name] = $pushedAt' <<< "${lastFetched:-"{}"}")
+			fi
+		done < <(jq -rc '.[]' <<< "$ghRepos")
+
+		# Run our workers in parallel and collect the output.
+		output=$(parallel -j6 ./validate.sh -- "${filteredNames[@]}")
 		jsonOutputs+="$output"$'\n'
 
-		if (( ${#repoNames[@]} < 100 )); then
+		if (( numRepos < 100 )); then
 			break
 		else
 			repoPage=$[ repoPage + 1 ]
 		fi
 	done
 
-	# Join all our objects into a single JSON array.
-	jq -s . > output/validate/tampered.json <<< "$jsonOutputs"
+	jq -s . <<< "$jsonOutputs" > output/validate/tampered.json
+	echo -n "$lastFetched" > output/validate/last_fetched.json
 }
 
 validateRepo() {

@@ -3,7 +3,7 @@
 # json::get(json, key)
 json::get() {
 	# https://github.com/stedolan/jq/issues/354
-	jq -r "$2 // empty" <<< "$1"
+	jq -rc "${@:3}" "$2 // empty" <<< "$1"
 }
 
 # json::obj([key, value]...)

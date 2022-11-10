@@ -69,7 +69,7 @@ validateAll() {
 		done < <(jq -rc '.[]' <<< "$ghRepos")
 
 		# Run our workers in parallel and collect the output.
-		output=$(parallel -j6 ./validate.sh -- "${filteredNames[@]}")
+		output=$(parallel -j10 ./validate.sh -- "${filteredNames[@]}")
 		jsonOutputs+="$output"$'\n'
 
 		if (( numRepos < 100 )); then

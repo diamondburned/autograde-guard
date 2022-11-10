@@ -29,9 +29,18 @@ validateAll() {
 	# Try and read our pushed at times.
 	lastFetched=""
 	oldTampered=""
+
+	# We'll be searching oldTampered a lot, so we put it into an assoc.
+	# array so we don't have to do O(n) searches on every single loop.
+	declare -A oldTamperedRepos
+
 	if [[ -f output/validate/last_fetched.json && -f output/validate/tampered.json ]]; then
 		lastFetched=$(< output/validate/last_fetched.json)
 		oldTampered=$(< output/validate/tampered.json)
+		while read -d $'\n' -r result; do
+			name=$(json::get "$result" ".repo")
+			oldTamperedRepos["$name"]="$result"
+		done < <(jq -rc ".[]" <<< "$oldTampered")
 	fi
 
 	while :; do
@@ -51,10 +60,8 @@ validateAll() {
 				continue
 			fi
 
-			lastPushedAt=$(json::get "$lastFetched" '.[$name]' \
-				--arg name "$name")
-			lastResult=$(json::get "$oldTampered" '.[] | select(.repo == $name)' \
-				--arg name "$name")
+			lastPushedAt=$(json::get "$lastFetched" '.[$name]' --arg name "$name")
+			lastResult="${oldTamperedRepos[$name]}"
 
 			if [[ "$lastResult" != "" && "$lastPushedAt" == "$pushedAt" ]]; then
 				log::trace "$name is unchanged, using its cache"
@@ -66,7 +73,7 @@ validateAll() {
 					--arg pushedAt "$pushedAt" \
 					'.[$name] = $pushedAt' <<< "${lastFetched:-"{}"}")
 			fi
-		done < <(jq -rc '.[]' <<< "$ghRepos")
+		done < <(jq -rc '.[] | {name, pushed_at}' <<< "$ghRepos")
 
 		# Run our workers in parallel and collect the output.
 		output=$(parallel -j10 ./validate.sh -- "${filteredNames[@]}")

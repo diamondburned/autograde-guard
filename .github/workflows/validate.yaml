@@ -21,7 +21,7 @@ jobs:
                   key: nix-${{ hashFiles('.nix/**') }}
                   nix_file: ".nix/action-deps.nix"
 
-	        - name: Restore last output
+            - name: Restore last output
               uses: actions/cache@v3
               with:
                   path: output/

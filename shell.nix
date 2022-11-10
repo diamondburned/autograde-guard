@@ -11,7 +11,7 @@ let actionDeps = import ./.nix/action-deps.nix;
 in pkgs.mkShell {
 	buildInputs = actionDeps ++ (with pkgs; [
 		ghcurl
-		nodejs
+		nodejs-16_x
 	]);
 
 	shellHook = ''

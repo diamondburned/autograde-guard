@@ -27,20 +27,25 @@ validateAll() {
 	mkdir -p output/validate/
 
 	# Try and read our pushed at times.
-	lastFetched=""
-	oldTampered=""
-
 	# We'll be searching oldTampered a lot, so we put it into an assoc.
 	# array so we don't have to do O(n) searches on every single loop.
-	declare -A oldTamperedRepos
+	declare -A oldTampered
+	declare -A lastFetched
 
 	if [[ -f output/validate/last_fetched.json && -f output/validate/tampered.json ]]; then
-		lastFetched=$(< output/validate/last_fetched.json)
-		oldTampered=$(< output/validate/tampered.json)
+		lastFetchedJSON=$(< output/validate/last_fetched.json)
+		oldTamperedJSON=$(< output/validate/tampered.json)
+
 		while read -d $'\n' -r result; do
 			name=$(json::get "$result" ".repo")
-			oldTamperedRepos["$name"]="$result"
-		done < <(jq -rc ".[]" <<< "$oldTampered")
+			oldTampered["$name"]="$result"
+		done < <(jq -rc ".[]" output/validate/tampered.json)
+
+		while read -d $'\n' -r result; do
+			name=$(json::get "$result" ".key")
+			time=$(json::get "$result" ".value")
+			lastFetched["$name"]="$time"
+		done < <(jq -rc "to_entries | .[]" output/validate/last_fetched.json)
 	fi
 
 	while :; do
@@ -60,18 +65,15 @@ validateAll() {
 				continue
 			fi
 
-			lastPushedAt=$(json::get "$lastFetched" '.[$name]' --arg name "$name")
-			lastResult="${oldTamperedRepos[$name]}"
+			lastPushedAt="${lastFetched["$name"]}"
+			lastResult="${oldTampered[$name]}"
 
 			if [[ "$lastResult" != "" && "$lastPushedAt" == "$pushedAt" ]]; then
 				log::trace "$name is unchanged, using its cache"
 				jsonOutputs+="$lastResult"
 			else
 				filteredNames+=( "$name" )
-				lastFetched=$(jq \
-					--arg name "$name" \
-					--arg pushedAt "$pushedAt" \
-					'.[$name] = $pushedAt' <<< "${lastFetched:-"{}"}")
+				lastFetched["$name"]="$pushedAt"
 			fi
 		done < <(jq -rc '.[] | {name, pushed_at}' <<< "$ghRepos")
 
@@ -86,8 +88,15 @@ validateAll() {
 		fi
 	done
 
+	# Save tampered.json.
 	jq -s . <<< "$jsonOutputs" > output/validate/tampered.json
-	echo -n "$lastFetched" > output/validate/last_fetched.json
+
+	# Save last_fetched.json.
+	for repo in "${!lastFetched[@]}"; do
+		json::obj \
+			key "$repo" \
+			value "${lastFetched[$repo]}"
+	done | jq -s 'from_entries' > output/validate/last_fetched.json
 }
 
 validateRepo() {

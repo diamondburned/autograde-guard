@@ -26,6 +26,7 @@
   }
 
   code {
+    --code-color: var(--color);
     background: none;
     padding: 0;
   }
@@ -91,7 +92,7 @@
     height: 1.3em;
     border-radius: 999px;
     background-color: var(--accordion-border-color);
-    vertical-align: sub;
+    vertical-align: text-bottom;
   }
 
   .verified-badge {
@@ -100,7 +101,11 @@
   }
 
   .verified-badge.unverified {
-    color: var(--unverified);
+    color: var(--muted-color);
+  }
+
+  .no-good-commit {
+    font-size: 0.8em;
   }
 </style>
 
@@ -122,9 +127,9 @@
           <li class="repository {{ if .tampered }}tampered{{ end }}" id="{{ .repo }}">
             <p class="tampered-icon">
               {{ if .tampered }}
-                <span class="material-icons">close</span>
+                <span class="material-icons keyword">close</span>
               {{ else }}
-                <span class="material-icons">done</span>
+                <span class="material-icons keyword">done</span>
               {{ end }}
             </p>
             <p>
@@ -134,7 +139,10 @@
               {{ if .tampered }}
                 is <span class="keyword">tampered</span>
               {{ else }}
-                is <span class="keyword">not tampered</span> with.
+                is <span class="keyword">not tampered</span> with
+              {{ end }}
+              {{ if not .good_commit }}
+                <span class="no-good-commit">(history is possibly overwritten)</span>
               {{ end }}
               {{ if .tampered }}
                 <br />

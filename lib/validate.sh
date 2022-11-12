@@ -80,7 +80,7 @@ validate::repoIsTampered() {
 			validate_good_committer_email=$(json::get "$j" .commit.committer.email)
 			validate_good_commit_is_verified=$(json::getb "$j" .commit.verification.verified)
 
-			foundGoodCommit=$TRUE	
+			foundGoodCommit=$TRUE
 			break
 		done < <(json::get "$ghCommits" '.[]')
 

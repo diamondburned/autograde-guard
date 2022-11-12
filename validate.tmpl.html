@@ -15,165 +15,161 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <style>
-	:root {
-		--ok-color: #34c628;
-		--verified: var(--ok-color);
-		--tampered: var(--del-color);
-		--not-tampered: var(--ok-color);
-	}
+  :root {
+    --ok-color: #34c628;
+    --verified: var(--ok-color);
+    --tampered: var(--del-color);
+    --not-tampered: var(--ok-color);
+  }
 
-	code {
-		background: none;
-		padding: 0;
-	}
+  code {
+    background: none;
+    padding: 0;
+  }
 
-	main > h4 {
-		font-weight: lighter;
-	}
+  main > h4 {
+    font-weight: lighter;
+  }
 
-	[title] {
-		text-decoration: underline;
-		text-decoration-style: dotted;
-		cursor: help;
-	}
+  [title] {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    cursor: help;
+  }
 
-	.repositories {
-		margin: 0;
-		padding: 0;
-	}
+  .repositories {
+    margin: 0;
+    padding: 0;
+  }
 
-	.repositories > li {
-		list-style: none;
-	}
+  .repositories > li {
+    list-style: none;
+  }
 
-	.repository {
-		display: flex;
-		flex-direction: row;
-		gap: 0.25em;
-	}
+  .repository {
+    display: flex;
+    flex-direction: row;
+    gap: 0.25em;
+  }
 
-	.repository:not(.tampered) {
-		opacity: 0.5;
-	}
+  .repository:not(.tampered) {
+    opacity: 0.5;
+  }
 
-	.repository .material-icons {
-		font-weight: bold;
-	}
+  .repository .material-icons {
+    font-weight: bold;
+  }
 
-	.repository .keyword,
-	.repository .material-icons {
-		color: var(--not-tampered);
-	}
+  .repository .keyword,
+  .repository .material-icons {
+    color: var(--not-tampered);
+  }
 
-	.repository.tampered .keyword,
-	.repository.tampered .material-icons {
-		color: var(--tampered);
-	}
+  .repository.tampered .keyword,
+  .repository.tampered .material-icons {
+    color: var(--tampered);
+  }
 
-	.repository .material-icons {
-		vertical-align: bottom;
-	}
+  .repository .material-icons {
+    vertical-align: bottom;
+  }
 
-	.repository p * {
-		display: inline-block;
-	}
+  .repository p * {
+    display: inline-block;
+  }
 
-	.repository .tampered-info {
-		margin-top: 0.5em;
-		font-size: 0.9em;
-	}
+  .repository .tampered-info {
+    margin-top: 0.5em;
+    font-size: 0.9em;
+  }
 
-	.github-user img {
-		width: 1.3em;
-		height: 1.3em;
-		border-radius: 999px;
-		background-color: var(--accordion-border-color);
-		vertical-align: sub;
-	}
+  .github-user img {
+    width: 1.3em;
+    height: 1.3em;
+    border-radius: 999px;
+    background-color: var(--accordion-border-color);
+    vertical-align: sub;
+  }
 
-	.verified-badge {
-		color: var(--verified);
-		font-size: 0.8em;
-	}
+  .verified-badge {
+    color: var(--verified);
+    font-size: 0.8em;
+  }
 </style>
 
 <main>
-	<h1>autograde-guard</h1>
-	<h4>
-		<b>Results</b>
-		at
-		<time datetime="{{ $tamperedLastMod.Format "2006-01-02T15:04" }}">
-			{{ $tamperedLastMod.Format "03:04 PM, 01/02/2006 (MST)" }}
-		</time>
-	</h4>
-	<section>
-		<ul class="repositories">
-			{{ $tampered = coll.Sort ".repo" $tampered }}
-			{{ range $tampered }}
-				{{ if or $config.validate_html.showNonTampered .tampered }}
-					<li class="repository {{ if .tampered }}tampered{{ end }}" id="{{ .repo }}">
-						<p class="tampered-icon">
-							{{ if .tampered }}
-								<span class="material-icons">close</span>
-							{{ else }}
-								<span class="material-icons">done</span>
-							{{ end }}
-						</p>
-						<p>
-							<span class="repository-name">
-								<a href="{{ .url }}">{{ .repo }}</a>
-							</span>
-							{{ if .tampered }}
-								is <span class="keyword">tampered</span>
-							{{ else }}
-								is <span class="keyword">not tampered</span> with.
-							{{ end }}
-							{{ if .tampered }}
-								<br />
-								<span class="tampered-info">
-									{{ if .last_commit }}
-										Commit
-										<a href="{{ .url }}/commit/{{ .last_commit }}">
-											{{ .last_commit }}
-										</a>
-										by
-										{{ if coll.Has . "last_author_id" }}
-											<span class="github-user">
-												<img src="{{ .last_author_avatar_url }}&size=128" />
-												<a
-													href="https://github.com/{{ .last_author_name }}"
-												>
-													{{ .last_author_name }}
-												</a>
-												{{ template "verified-badge" . }}
-											</span>
-										{{ else }}
-											<span class="git-user">
-												<code
-													title="{{ .last_committer_name }} &lt;{{ .last_committer_email }}&gt;"
-												>
-													{{ .last_committer_name }}
-												</code>
-												{{ template "verified-badge" . }}
-											</span>
-										{{ end }}
-									{{ else }}
-										<code>.github</code> not found in history
-									{{ end }}
-								</span>
-							{{ end }}
-						</p>
-					</li>
-				{{ end }}
-			{{ end }}
-		</ul>
-	</section>
+  <h1>autograde-guard</h1>
+  <h4>
+    <b>Results</b>
+    at
+    <time datetime="{{ $tamperedLastMod.Format "2006-01-02T15:04" }}">
+      {{ $tamperedLastMod.Format "03:04 PM, 01/02/2006 (MST)" }}
+    </time>
+  </h4>
+  <section>
+    <ul class="repositories">
+      {{ $tampered = coll.Sort ".repo" $tampered }}
+      {{ range $tampered }}
+        {{ if or $config.validate_html.showNonTampered .tampered }}
+          <li class="repository {{ if .tampered }}tampered{{ end }}" id="{{ .repo }}">
+            <p class="tampered-icon">
+              {{ if .tampered }}
+                <span class="material-icons">close</span>
+              {{ else }}
+                <span class="material-icons">done</span>
+              {{ end }}
+            </p>
+            <p>
+              <span class="repository-name">
+                <a href="{{ .url }}">{{ .repo }}</a>
+              </span>
+              {{ if .tampered }}
+                is <span class="keyword">tampered</span>
+              {{ else }}
+                is <span class="keyword">not tampered</span> with.
+              {{ end }}
+              {{ if .tampered }}
+                <br />
+                <span class="tampered-info">
+                  {{ if .last_commit }}
+                    Commit
+                    <a href="{{ .url }}/commit/{{ .last_commit }}">
+                      {{ .last_commit }}
+                    </a>
+                    by
+                    {{ if coll.Has . "last_author_id" }}
+                      <span class="github-user">
+                        <img src="{{ .last_author_avatar_url }}&size=128" />
+                        <a href="https://github.com/{{ .last_author_name }}">
+                          {{ .last_author_name }}
+                        </a>
+                        {{ template "verified-badge" . }}
+                      </span>
+                    {{ else }}
+                      <span class="git-user">
+                        <code title="{{ .last_committer_name }} &lt;{{ .last_committer_email }}&gt;">
+                          {{ .last_committer_name }}
+                        </code>
+                        {{ template "verified-badge" . }}
+                      </span>
+                    {{ end }}
+                  {{ else }}
+                    <code>.github</code> not found in history
+                  {{ end }}
+                </span>
+              {{ end }}
+            </p>
+          </li>
+        {{ end }}
+      {{ end }}
+    </ul>
+  </section>
 </main>
 
 {{ define "verified-badge" }}
-	{{ if (has . "last_commit_is_verified") }}
-		{{ if (eq (index . "last_commit_is_verified") true) }}
-			<span class="verified-badge">(verified)</span>
-		{{ end }}
-	{{ end }}
+  {{ if (has . "last_commit_is_verified") }}
+    {{ if (eq (index . "last_commit_is_verified") true) }}
+      <span class="verified-badge">(verified)</span>
+    {{ end }}
+  {{ end }}
 {{ end }}

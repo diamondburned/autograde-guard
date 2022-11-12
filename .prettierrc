@@ -11,6 +11,9 @@
     {
       "files": "*.html",
       "options": {
+        "tabWidth": 2,
+        "useTabs": false,
+        "printWidth": 120,
         "parser": "go-template"
       }
     }

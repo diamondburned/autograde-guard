@@ -7,6 +7,7 @@ set -e # safe mode
 . lib/validate.sh
 
 orgName=$(config::get ".organizationName")
+jsonVersion=1
 
 main() {
 	if (( $# == 0 )); then
@@ -36,20 +37,25 @@ validateAll() {
 		lastFetchedJSON=$(< output/validate/last_fetched.json)
 		oldTamperedJSON=$(< output/validate/tampered.json)
 
-		while read -d $'\n' -r result; do
-			name=$(json::get "$result" ".repo")
-			oldTampered["$name"]="$result"
-		done < <(jq -rc ".[]" output/validate/tampered.json)
+		fetchedVersion=$(json::get "$lastFetchedJSON" ".version")
+		if (( fetchedVersion == jsonVersion )); then
+			while read -d $'\n' -r result; do
+				name=$(json::get "$result" ".repo")
+				oldTampered["$name"]="$result"
+			done < <(jq -rc ".[]" output/validate/tampered.json)
 
-		while read -d $'\n' -r result; do
-			name=$(json::get "$result" ".key")
-			time=$(json::get "$result" ".value")
-			lastFetched["$name"]="$time"
-		done < <(jq -rc "to_entries | .[]" output/validate/last_fetched.json)
+			while read -d $'\n' -r result; do
+				name=$(json::get "$result" ".key")
+				time=$(json::get "$result" ".value")
+				lastFetched["$name"]="$time"
+			done < <(jq -rc ".history | to_entries | .[]" output/validate/last_fetched.json)
+		fi
 	fi
 
 	while :; do
-		printf -v path "/orgs/%s/repos?per_page=100&page=%d" "$orgName" "$repoPage"
+		printf -v path \
+			"/orgs/%s/repos?per_page=100&page=%d" \
+			"$orgName" "$repoPage"
 		ghRepos=$(ghcurl "$path")
 
 		filteredNames=()
@@ -96,11 +102,20 @@ validateAll() {
 		json::obj \
 			key "$repo" \
 			value "${lastFetched[$repo]}"
-	done | jq -s 'from_entries' > output/validate/last_fetched.json
+	done \
+		| jq -s --arg version 1 '{$version, history: from_entries}' \
+		> output/validate/last_fetched.json
 }
 
 validateRepo() {
 	local repo="$1"
+
+	obj=(
+		repo "$repo"
+		org "$orgName"
+		url "https://github.com/$orgName/$repo"
+	)
+
 	if validate::repoIsTampered "$repo"; then
 		local extraMessage=""
 		if [[ "${validate_last_commit}" ]]; then
@@ -114,27 +129,63 @@ validateRepo() {
 
 		log "$repo is tampered ($extraMessage)."
 
-		json::obj \
-			repo "$repo" \
-			org "$orgName" \
-			url "https://github.com/$orgName/$repo" \
-			tampered true \
-			last_commit "$validate_last_commit_hash" \
-			last_committer_name,omitempty "$validate_last_committer_name" \
-			last_committer_email,omitempty "$validate_last_committer_email" \
-			last_commit_is_verified,omitempty "$validate_last_commit_is_verified" \
-			last_author_id,omitempty "$validate_last_author_id" \
-			last_author_name,omitempty "$validate_last_author_name" \
-			last_author_avatar_url,omitempty "$validate_last_author_avatar_url"
+		obj+=( tampered! true )
+		
+		if [[ "$validate_last_commit" != "" ]]; then
+			local authorJSON=""
+			if [[ "$validate_last_author_id" != "" ]]; then
+				authorJSON="$(json::obj \
+					id "$validate_last_author_id" \
+					name "$validate_last_author_name" \
+					avatar_url "$validate_last_author_avatar_url"
+				)"
+			fi
+
+			obj+=(
+				last_commit! "$(json::obj \
+					hash "$validate_last_commit_hash" \
+					is_verified! "$validate_last_commit_is_verified" \
+					committer! "$(json::obj \
+						name "$validate_last_committer_name" \
+						email "$validate_last_committer_email" \
+					)" \
+					author! "$authorJSON"
+				)"
+			)
+		else
+			obj+=( last_commit! "" )
+		fi
+
+		if [[ "$validate_good_commit" != "" ]]; then
+			local authorJSON=""
+			if [[ "$validate_good_author_id" != "" ]]; then
+				authorJSON="$(json::obj \
+					id "$validate_good_author_id" \
+					name "$validate_good_author_name" \
+					avatar_url "$validate_good_author_avatar_url"
+				)"
+			fi
+
+			obj+=(
+				good_commit! "$(json::obj \
+					hash "$validate_good_commit_hash" \
+					is_verified! "$validate_good_commit_is_verified" \
+					committer! "$(json::obj \
+						name "$validate_good_committer_name" \
+						email "$validate_good_committer_email"
+					)" \
+					author! "$authorJSON"
+				)"
+			)
+		else
+			obj+=( good_commit! "" )
+		fi
 	else
 		log::trace "$repo is not tampered."
-
-		json::obj \
-			repo "$repo" \
-			org "$orgName" \
-			url "https://github.com/$orgName/$repo" \
-			tampered false
+		obj+=( tampered! false )
 	fi
+
+	json::obj "${obj[@]}"
 }
 
 main "$@"

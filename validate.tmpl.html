@@ -17,7 +17,10 @@
 <style>
   :root {
     --ok-color: #34c628;
+
     --verified: var(--ok-color);
+    --unverified: var(--del-color);
+
     --tampered: var(--del-color);
     --not-tampered: var(--ok-color);
   }
@@ -95,6 +98,10 @@
     color: var(--verified);
     font-size: 0.8em;
   }
+
+  .verified-badge.unverified {
+    color: var(--unverified);
+  }
 </style>
 
 <main>
@@ -110,6 +117,7 @@
     <ul class="repositories">
       {{ $tampered = coll.Sort ".repo" $tampered }}
       {{ range $tampered }}
+        {{ $repo := . }}
         {{ if or $config.validate_html.showNonTampered .tampered }}
           <li class="repository {{ if .tampered }}tampered{{ end }}" id="{{ .repo }}">
             <p class="tampered-icon">
@@ -131,24 +139,24 @@
               {{ if .tampered }}
                 <br />
                 <span class="tampered-info">
-                  {{ if .last_commit }}
+                  {{ with .last_commit }}
                     Commit
-                    <a href="{{ .url }}/commit/{{ .last_commit }}">
-                      {{ .last_commit }}
+                    <a href="{{ $repo.url }}/commit/{{ .hash }}">
+                      {{ strings.Trunc 7 .hash }}
                     </a>
                     by
-                    {{ if coll.Has . "last_author_id" }}
+                    {{ if .author }}
                       <span class="github-user">
-                        <img src="{{ .last_author_avatar_url }}&size=128" />
-                        <a href="https://github.com/{{ .last_author_name }}">
-                          {{ .last_author_name }}
+                        <img src="{{ .author.avatar_url }}&size=128" />
+                        <a href="https://github.com/{{ .author.name }}">
+                          {{ .author.name }}
                         </a>
                         {{ template "verified-badge" . }}
                       </span>
                     {{ else }}
                       <span class="git-user">
-                        <code title="{{ .last_committer_name }} &lt;{{ .last_committer_email }}&gt;">
-                          {{ .last_committer_name }}
+                        <code title="{{ .committer.name }} &lt;{{ .committer.email }}&gt;">
+                          {{ .committer.name }}
                         </code>
                         {{ template "verified-badge" . }}
                       </span>
@@ -167,9 +175,10 @@
 </main>
 
 {{ define "verified-badge" }}
-  {{ if (has . "last_commit_is_verified") }}
-    {{ if (eq (index . "last_commit_is_verified") true) }}
-      <span class="verified-badge">(verified)</span>
-    {{ end }}
+  {{ if eq .is_verified false }}
+    <span class="verified-badge unverified">(unverified)</span>
+  {{ end }}
+  {{ if eq .is_verified true }}
+    <span class="verified-badge">(verified)</span>
   {{ end }}
 {{ end }}

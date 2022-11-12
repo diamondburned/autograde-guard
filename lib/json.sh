@@ -6,6 +6,13 @@ json::get() {
 	jq -rc "${@:3}" "$2 // empty" <<< "$1"
 }
 
+# json::getb(json, key)
+#
+# json::getb is like json::get, but it always returns a boolean value or null.
+json::getb() {
+	jq -rc "${@:3}" "$2 | if (type == \"boolean\") then . else null end" <<< "$1"
+}
+
 # json::obj([key, value]...)
 #
 # json::obj serializes the given argument pairs into a JSON object. If a name is
@@ -22,19 +29,20 @@ json::obj() {
 		local v="${!i}"
 
 		local jarg=--arg
-		[[ $v == "true" || $v == "false" || $k == *"!" ]] && jarg=--argjson
+		if [[ $k == *"!" ]]; then
+			k=${k::-1}
+			jarg=--argjson
+		fi
 
 		# Handle ,omitempty.
 		if [[ $k == *",omitempty" ]]; then
 			# Trim the ,omitempty away.
 			k=${k%*,omitempty}
 			[[ $v == "" ]] && continue
-		else
-			# Just consider empty strings as null. Whatever.
-			if [[ $v == "" ]]; then
-				v=null
-				jarg=--argjson
-			fi
+		fi
+
+		if [[ $v == "" && $jarg == "--argjson" ]]; then
+			v=null
 		fi
 
 		args+=( $jarg "$k" "$v" )

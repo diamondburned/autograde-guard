@@ -34,21 +34,19 @@ validateAll() {
 	declare -A lastFetched
 
 	if [[ -f output/validate/last_fetched.json && -f output/validate/tampered.json ]]; then
-		lastFetchedJSON=$(< output/validate/last_fetched.json)
-		oldTamperedJSON=$(< output/validate/tampered.json)
-
-		fetchedVersion=$(json::get "$lastFetchedJSON" ".version")
+		fetchedVersion=$(jq -r ".version" output/validate/last_fetched.json)
 		if (( fetchedVersion == jsonVersion )); then
 			while read -d $'\n' -r result; do
-				name=$(json::get "$result" ".repo")
-				oldTampered["$name"]="$result"
-			done < <(jq -rc ".[]" output/validate/tampered.json)
+				name="${result%%/*}"
+				json="${result#*/}"
+				oldTampered["$name"]="$json"
+			done < <(jq -rc '.[] | "\(.repo)/\(.)"' output/validate/tampered.json)
 
 			while read -d $'\n' -r result; do
-				name=$(json::get "$result" ".key")
-				time=$(json::get "$result" ".value")
+				name="${result%%/*}"
+				time="${result#*/}"
 				lastFetched["$name"]="$time"
-			done < <(jq -rc ".history | to_entries | .[]" output/validate/last_fetched.json)
+			done < <(jq -rc '.history | to_entries | .[] | "\(.key)/\(.value)"' output/validate/last_fetched.json)
 		fi
 	fi
 
